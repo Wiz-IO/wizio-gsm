@@ -1,11 +1,11 @@
 # PlatformIO development platform for GSM modules
 
-## Support Modules
+## Supported Modules
 * Quectel M66
 * * OpenCPU
 * * Arduino - TODO
 
-## Support Board
+## Supported Boards
 * Comet M66
 
 ![oled](https://raw.githubusercontent.com/Wiz-IO/LIB/master/images/comet-m66.jpg)
