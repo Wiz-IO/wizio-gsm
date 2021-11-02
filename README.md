@@ -3,7 +3,7 @@
 ## Install Platform
 _Note: be sure [**git**](https://git-scm.com/downloads) is installed_
 * PIO Home > Platforms > Advanced Installation 
-* paste https://github.com/Wiz-IO/wizio-cc
+* paste https://github.com/Wiz-IO/wizio-gsm
 * INSTALL
 
 
