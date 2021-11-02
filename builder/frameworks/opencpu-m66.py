@@ -69,7 +69,6 @@ def dev_create_template(env):
     if False == os.path.isfile( join( src, 'main.cpp' ) ):
         do_copy(template, src, 'main.c' )         
    
-
 def dev_init(env):
     dev_set_compiler(env)
     SDK_DIR = join( env.framework_dir, env.platform, env.core )
