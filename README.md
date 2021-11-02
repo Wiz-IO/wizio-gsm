@@ -4,9 +4,11 @@
 * Quectel M66
 * * OpenCPU
 * * Arduino - TODO
+* other - in progress... 
 
 ## Supported Boards
 * Comet M66
+* other - in progress...
 
 ![oled](https://raw.githubusercontent.com/Wiz-IO/LIB/master/images/comet-m66.jpg)
 
