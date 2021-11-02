@@ -4,27 +4,6 @@
 * Quectel M66
 * * OpenCPU
 * * Arduino - TODO
-* Quectel MC60
-* * OpenCPU - TODO
-* * Arduino - TODO
-* Quectel BC66
-* * OpenCPU - TODO
-* * Arduino - TODO 
-* Quectel BG96
-* * ThreadX - TODO
-* * Arduino - TODO
-* Quectel BG95
-* * ThreadX - TODO
-* * Arduino - TODO
-* Quectel BG95
-* * ThreadX - TODO
-* * Arduino - TODO 
-* Quectel BG77
-* * ThreadX - TODO
-* * Arduino - TODO
-* Quectel EC25
-* * OpenLinux - TODO
-* * Arduino - TODO 
 
 ## Support Board
 * Comet M66
