@@ -87,6 +87,7 @@ def dev_init(env):
             join('$PROJECT_DIR', 'config'),
             join(SDK_DIR, 'SDK', 'include'),
             join(SDK_DIR, 'SDK', 'ril', 'inc'),
+            join(SDK_DIR, 'SDK', 'hal'),
         ],
         CCFLAGS    = [ ],
         CFLAGS     = [
@@ -119,3 +120,4 @@ def dev_init(env):
 
     env.BuildSources( join('$BUILD_DIR', 'config'), join('$PROJECT_DIR', 'config') )
     env.BuildSources( join('$BUILD_DIR', 'ril'), join(SDK_DIR, 'SDK', 'ril', 'src') )
+    env.BuildSources( join('$BUILD_DIR', 'hal'), join(SDK_DIR, 'SDK', 'hal') )
