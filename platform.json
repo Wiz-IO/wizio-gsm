@@ -36,8 +36,8 @@
   "packages": {
     "framework-wizio-gsm": {
         "type": "framework",
-        "version": "1.0.0",
-        "xversion": "https://github.com/Wiz-IO/framework-wizio-gsm.git"
+        "xversion": "1.0.0",
+        "version": "https://github.com/Wiz-IO/framework-wizio-gsm.git"
     },
     "toolchain-gccarmnoneeabi": {
         "type": "toolchain",
