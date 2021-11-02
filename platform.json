@@ -1,0 +1,48 @@
+{
+  "name": "wizio-gsm",
+  "title": "WizIO - GSM",
+  "description": "Development platform for GSM Modules 2021 Georgi Angelov",
+  "homepage": "http://www.wizio.eu/",
+  "license": "Apache-2.0",
+  "engines": {
+    "platformio": "^5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Wiz-IO/wizio-gsm.git"
+  },
+  "version": "1.0.0",
+  "packageRepositories": [
+    "http://dl.platformio.org/packages/manifest.json"
+  ],
+  "frameworks": {
+    "opencpu": {
+      "package": "framework-wizio-gsm",
+      "script": "builder/frameworks/opencpu.py"
+    },    
+      "threadx": {
+        "package": "framework-wizio-gsm",
+        "script": "builder/frameworks/threadx.py"
+      },
+      "openlinux": {
+        "package": "framework-gsm",
+        "script": "builder/frameworks/openlinux.py"
+      },      
+      "arduino": {
+        "package": "framework-wizio-gsm",
+        "script": "builder/frameworks/arduino.py"
+      }
+  },
+  "packages": {
+    "framework-wizio-gsm": {
+        "type": "framework",
+        "version": "1.0.0",
+        "xversion": "https://github.com/Wiz-IO/framework-wizio-gsm.git"
+    },
+    "toolchain-gccarmnoneeabi": {
+        "type": "toolchain",
+        "version": "=1.70201.0"
+    }
+
+  }
+}

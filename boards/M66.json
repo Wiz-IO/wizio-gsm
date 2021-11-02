@@ -1,0 +1,27 @@
+{
+  "name": "Comet M66 Demo board",
+  "url": "https://www.comet.bg/en/",
+  "build": {
+    "cortex"  : ["-march=armv5te", "-mfloat-abi=soft", "-mfpu=vfp", "-mthumb", "-mthumb-interwork"],
+    "core"    : "m66",
+    "variant" : "m66",
+    "f_cpu"   : "260000000L",
+    "mcu"     : "ARM, MT6261"
+  },
+  "debug": {
+    "tools": {
+      "uart": {
+        "onboard": true,
+        "extra_cmds": [],
+        "load_cmd": [],
+        "server": {}
+      }
+    }
+  },  
+  "frameworks": ["opencpu", "arduino"],
+  "vendor": "Quectel",
+  "upload": {
+        "maximum_ram_size": 102400,
+        "maximum_size": 368640
+  }
+}
