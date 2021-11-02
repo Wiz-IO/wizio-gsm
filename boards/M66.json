@@ -1,5 +1,5 @@
 {
-  "name": "Comet M66 Demo board",
+  "name": "Quectel M66 EVB",
   "url": "https://www.comet.bg/en/",
   "build": {
     "cortex"  : ["-march=armv5te", "-mfloat-abi=soft", "-mfpu=vfp", "-mthumb", "-mthumb-interwork"],
