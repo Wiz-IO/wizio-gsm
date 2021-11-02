@@ -1,2 +1,2 @@
-# wizio-gsm
-PlatformIO development platform for GSM modules
+# PlatformIO development platform for GSM modules
+TODO
