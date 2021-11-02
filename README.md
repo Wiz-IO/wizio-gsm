@@ -8,6 +8,8 @@
 ## Support Board
 * Comet M66
 
+![oled](https://raw.githubusercontent.com/Wiz-IO/LIB/master/images/comet-m66.jpg)
+
 ## Install Platform
 _Note: be sure [**git**](https://git-scm.com/downloads) is installed_
 * PIO Home > Platforms > Advanced Installation 
