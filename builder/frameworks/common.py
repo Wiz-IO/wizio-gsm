@@ -90,6 +90,7 @@ def dev_set_compiler(env):
         ASFLAGS    = [ env.cortex, "-x", "assembler-with-cpp" ],
         CPPDEFINES = [],
         CPPPATH    = [
+            join("$PROJECT_DIR", "src"),
             join("$PROJECT_DIR", "lib"),
             join("$PROJECT_DIR", "include"), 
             join("$PROJECT_DIR", "config")              
