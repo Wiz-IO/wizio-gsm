@@ -7,11 +7,9 @@
 #   https://www.comet.bg/en
 ##########################################################################
 
-import os, struct
-from shutil import copyfile
+import os, struct, math
 from os.path import join
-from SCons.Script import DefaultEnvironment, Builder
-from colorama import Fore
+from SCons.Script import Builder
 from common import *
 from MT6261 import upload_app
 
@@ -42,7 +40,7 @@ def dev_header(target, source, env):
     dst.write( src.read() )
     for i in range(rem_size):
         dst.write(b'\0')
-    print( 'BIN FILE SIZE:', dst.tell()/1024, 'kB' )
+    print( 'BIN FILE SIZE:', math.trunc(dst.tell()/1024), 'kB' )
     src.close()
     dst.close() 
 
@@ -111,7 +109,7 @@ def dev_init(env):
                 suffix = '.dat'
             ),    
             MakeHeader = Builder( 
-                action = env.VerboseAction(dev_header, 'ADD HEADER'),
+                action = env.VerboseAction(dev_header, ''),
                 suffix = '.bin'
             )       
         ), 
