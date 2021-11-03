@@ -77,8 +77,10 @@ def dev_set_compiler(env):
         SIZEPRINTCMD='$SIZETOOL --mcu=$BOARD_MCU -C -d $SOURCES',
         PROGSUFFIX=".elf",  
     )
+
     env.libs = [] 
     env.nano = [] 
+
     env.mcu           = env.BoardConfig().get("build.mcu", "default")      # chip info
     env.core          = env.BoardConfig().get("build.core", "default")     # arduino core
     env.variant       = env.BoardConfig().get("build.variant", "default")  # arduino variant
