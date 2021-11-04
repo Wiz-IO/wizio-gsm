@@ -78,7 +78,7 @@ def dev_init(env):
 
     env.Append(
         ASFLAGS    = [],
-        CPPDEFINES = [],
+        CPPDEFINES = [ "ARDUINO=200", ],
         CPPPATH    = [
             join(env.framework_dir, 'arduino', 'arduino'),
             join(env.framework_dir, 'arduino', 'cores', env.core),                       
@@ -101,8 +101,9 @@ def dev_init(env):
             '-mno-unaligned-access',            
             '-Wl,--gc-sections,--relax', 
         ],
-        LIBPATH    = [ join(SDK_DIR, 'LIB') ], 
-        LIBS       = [ 'm', 'c', 'gcc', '_app_start_{}'.format(env.core) ], 
+        LIBSOURCE_DIRS = [ join(env.framework_dir, 'arduino', 'libraries', env.core),  ],   
+        LIBPATH        = [ join(SDK_DIR, 'LIB') ], 
+        LIBS           = [ 'm', 'c', 'gcc', '_app_start_{}'.format(env.core) ], 
 
         BUILDERS = dict(
             ElfToBin = Builder(
