@@ -14,7 +14,11 @@ from common import *
 from MT6261 import upload_app
 
 def dev_uploader(target, source, env):
-    return upload_app(env.BoardConfig().get('build.core'), join(env.get('BUILD_DIR'), 'program.bin'), env.get('UPLOAD_PORT')) 
+    return upload_app( env.BoardConfig().get('build.core'), 
+                       join(env.get('BUILD_DIR'), 'program.bin'), 
+                       env.get('UPLOAD_PORT'), 
+                       env.BoardConfig().get("build.device_format_fat", "no") == 'yes',
+                       env.BoardConfig().get("build.device_reset",      "no") == 'yes'  )
 
 def dev_header(target, source, env):  
     dat = source[0].path

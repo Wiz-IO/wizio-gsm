@@ -14,7 +14,11 @@ from common import *
 from MT6261 import upload_app
 
 def dev_uploader(target, source, env):
-    return upload_app(env.BoardConfig().get('build.core'), join(env.get('BUILD_DIR'), 'program.bin'), env.get('UPLOAD_PORT')) 
+    return upload_app( env.BoardConfig().get('build.core'), 
+                       join(env.get('BUILD_DIR'), 'program.bin'), 
+                       env.get('UPLOAD_PORT'), 
+                       env.BoardConfig().get("build.device_format_fat", "no") == 'yes',
+                       env.BoardConfig().get("build.device_reset",      "no") == 'yes'  )
 
 def dev_header(target, source, env):  
     dat = source[0].path
@@ -43,7 +47,6 @@ def dev_header(target, source, env):
     print( 'BIN FILE SIZE:', math.trunc(dst.tell()/1024), 'kB' )
     src.close()
     dst.close() 
-
     f = open(dat.replace('.dat', '.cfg'), 'w')
     f.write('program.bin\n')
     f.close    
@@ -60,22 +63,19 @@ def dev_create_template(env):
         'custom_config.c',
         'custom_sys_cfg.c',
     ]    
-    for file_name in files: do_copy(template, config, file_name)
-
+    for file_name in files: 
+        do_copy(template, config, file_name)
     old = join(config, 'arduino_task_cfg.h')
     new = join(config, 'custom_task_cfg.h')
-    if True == os.path.isfile( old ) and False == os.path.isfile( new ): os.rename( old, new )
-   
-   
+    if True == os.path.isfile( old ) and False == os.path.isfile( new ): 
+        os.rename( old, new )
+    
 def dev_init(env):
     dev_set_compiler(env)
     SDK_DIR = join( env.framework_dir, 'opencpu', env.core )
-
     dev_set_linker(env, 'cpp_m66.ld')
-
     dev_set_nano(env)
     dev_create_template(env)
-
     env.Append(
         ASFLAGS    = [],
         CPPDEFINES = [ "ARDUINO=200", ],

@@ -1,10 +1,12 @@
 ############################################################################
  # 
- # Mediatek MT6261 Flash Utility ver 1.00 MOD PlatformIO
+ # Mediatek MT6261 Flash Utility ver 2.00 MOD for PlatformIO
  #
  #   Copyright (C) 2019 Georgi Angelov. All rights reserved.
- #   Author: Georgi Angelov <the.wizarda@gmail.com> WizIO
  #
+ #   Authors: Georgi Angelov <the.wizarda@gmail.com> WizIO
+ #            Ajay Bhargav
+ # 
  # Redistribution and use in source and binary forms, with or without
  # modification, are permitted provided that the following conditions
  # are met:
@@ -42,8 +44,6 @@ import os.path
 from os.path import join
 from serial import Serial
 from binascii import hexlify
-import inspect
-
 ############################################################################
 PYTHON2 = sys.version_info[0] < 3  # True if on pre-Python 3
 if PYTHON2:
@@ -53,14 +53,13 @@ else:
         return iter( range(*args, **kwargs) )
 ############################################################################
 
-DEBUG = False
+DEBUG                       = False
 
 NONE                        =''
 CONF                        =b'\x69'
 STOP                        =b'\x96'
 ACK                         =b'\x5A'
 NACK                        =b'\xA5'
-
 CMD_READ_16                 =b'\xA2'
 CMD_READ16                  =b'\xD0'
 CMD_READ32                  =b'\xD1'
@@ -69,8 +68,9 @@ CMD_WRITE32                 =b'\xD4'
 CMD_JUMP_DA                 =b'\xD5'    
 CMD_SEND_DA                 =b'\xD7'
 CMD_SEND_EPP                =b'\xD9'
-
 DA_SYNC                     =b'\xC0'
+DA_FORMAT_FAT               =b'\xB8'
+DA_CLEAR_POWERKEY           =b'\xB9'
 DA_CONFIG_EMI               =b'\xD0'
 DA_POST_PROCESS             =b'\xD1'
 DA_SPEED                    =b'\xD2'
@@ -82,16 +82,11 @@ DA_WRITE_REG16              =b'\xD7'
 DA_READ_REG16               =b'\xD8'
 DA_FINISH                   =b'\xD9'
 DA_GET_DSP_VER              =b'\xDA'
-DA_ENABLE_WATCHDOG          =b'\xDB'
+DA_ENABLE_WATCHDOG_CMD      =b'\xDB' 
 DA_NFB_WRITE_BLOADER        =b'\xDC'
 DA_NAND_IMAGE_LIST          =b'\xDD'
 DA_NFB_WRITE_IMAGE          =b'\xDE'
 DA_NAND_READPAGE            =b'\xDF'
-
-DA_CLEAR_POWERKEY_IN_META_MODE_CMD =b'\xB9'
-DA_ENABLE_WATCHDOG_CMD      =b'\xDB'  
-DA_GET_PROJECT_ID_CMD       =b'\xEF' 
-
 UART_BAUD_921600            =b'\x01'
 UART_BAUD_460800            =b'\x02'
 UART_BAUD_230400            =b'\x03'
@@ -151,23 +146,16 @@ class MT6261:
         self.s = ser
         self.dir = os.path.dirname( os.path.realpath(__file__) )
 
-    def crc_byte(self, data, chs=0):
+    def crc_word(self, data):
+        crc = 0
         for i in xrange(0, len(data), 1):
             if PYTHON2:
-                chs = chs&0xff + ord(data[i])
+                crc += ord( data[i] & 0xFF )
             else:
-                chs = chs&0xff + data[i]
-        return chs
+                crc += data[i] & 0xFF
+        return crc & 0xFFFF        
 
-    def crc_word(self, data, chs=0):
-        for i in xrange(0, len(data), 1):
-            if PYTHON2:
-                chs += ord(data[i])
-            else:
-                chs += data[i]
-        return chs & 0xFFFF        
-
-    def send(self, data, sz = 0):
+    def send(self, data, read_size = 0):
         r = ""
         if len(data):
             if DEBUG: 
@@ -175,8 +163,8 @@ class MT6261:
             else:
                 PB_STEP()
             self.s.write(data) 
-        if sz > 0:
-            r = self.s.read(sz) 
+        if read_size > 0:
+            r = self.s.read(read_size) 
             if DEBUG: 
                 print("<-- {}".format(hexs(r)))
             else: 
@@ -222,10 +210,9 @@ class MT6261:
 
     def da_send_da(self, address, size, data, block=4096):
         r = self.cmd(CMD_SEND_DA + struct.pack(">III", address, size, block), 2)
-        assert r == b"\0\0"
+        ASSERT( r == b"\0\0", 'answer DA')
         while data:
             self.s.write(data[:block])
-            #print("sent", hex(len(data[:block])))
             data = data[block:]     
             PB_STEP()              
         r = self.cmd(b"", 4) # checksum         
@@ -276,19 +263,19 @@ class MT6261:
         BB_CPU_SW = self.da_read_16(0x80000004)[0] #BB_CPU_SW = 0001
         BB_CPU_ID = self.da_read_16(0x80000008)[0] #BB_CPU_ID = 6261
         BB_CPU_SB = self.da_read_16(0x8000000C)[0] #BB_CPU_SB = 8000
-        self.da_write16(0xa0700a28, 0x4010)#01        
-        self.da_write16(0xa0700a00, 0xF210)#02        
-        self.da_write16(0xa0030000, 0x2200)#03        
-        self.da_write16(0xa071004c, 0x1a57)#04        
-        self.da_write16(0xa071004c, 0x2b68)#05        
-        self.da_write16(0xa071004c, 0x042e)#06        
-        self.da_write16(0xa0710068, 0x586a)#07        
-        self.da_write16(0xa0710074, 0x0001)#08        
-        self.da_write16(0xa0710068, 0x9136)#09        
-        self.da_write16(0xa0710074, 0x0001)#10        
-        self.da_write16(0xa0710000, 0x430e)#11        
-        self.da_write16(0xa0710074, 0x0001)#12
-        self.da_write32(0xa0510000, 0x00000002)# ???
+        self.da_write16(0xa0700a28, 0x4010) #01        
+        self.da_write16(0xa0700a00, 0xF210) #02        
+        self.da_write16(0xa0030000, 0x2200) #03        
+        self.da_write16(0xa071004c, 0x1a57) #04        
+        self.da_write16(0xa071004c, 0x2b68) #05        
+        self.da_write16(0xa071004c, 0x042e) #06        
+        self.da_write16(0xa0710068, 0x586a) #07        
+        self.da_write16(0xa0710074, 0x0001) #08        
+        self.da_write16(0xa0710068, 0x9136) #09        
+        self.da_write16(0xa0710074, 0x0001) #10        
+        self.da_write16(0xa0710000, 0x430e) #11        
+        self.da_write16(0xa0710074, 0x0001) #12
+        self.da_write32(0xa0510000, 0x00000002) # ?
         if BB_CPU_ID == 0x6260:
             self.chip = "MT6260"
             self.loadBootLoader("MT6260.bin")      
@@ -302,13 +289,12 @@ class MT6261:
     def da_start(self): 
         print("Sending MTK Download Agent. Please wait".format(self.chip))   
         PB_BEGIN()
-#SEND_DA_1
+        #SEND_DA_1
         offset = self.DA[self.chip]["1"]["offset"]
         size   = self.DA[self.chip]["1"]["size"]
         addr1  = self.DA[self.chip]["1"]["address"]
         data   = self.get_da(offset, size)
         self.da_send_da(addr1, size, data, 0x400) #<--chs = D5AF.0000
-        #PB_END(); PB_BEGIN() 
         #SEND_DA_2
         offset = self.DA[self.chip]["2"]["offset"]
         size   = self.DA[self.chip]["2"]["size"]
@@ -326,47 +312,59 @@ class MT6261:
         self.send(b"\0\0\0\0", 256) # EMI_SETTINGS ??     
         PB_END()
 
-    def da_mem(self, address, size, fota = NACK, mem_block_count = 1, type = 0x00007000): # NACK: disable FOTA feature  
-        address %= 0x08000000
-        r = self.send(DA_MEM + fota + struct.pack(">BIII", mem_block_count, address, address + size - 1, type), 1)
-        ASSERT(r == ACK, "DA_MEM ACK")
-        r = self.send(NONE, 7) #<-- 015A000000005A
+    def da_mem(self, address, size, fota = NACK, block_count = 1, type = 0x00007000): # NACK: disable FOTA feature  
+        start_addr = address & 0x07FFFFFF
+        end_addr = start_addr + size - 1
+        r = self.send(DA_MEM + fota + struct.pack(">BIII", block_count, start_addr, end_addr, type), 1) #--> D3A501002C7000002D732F00007000
+        ASSERT(r == ACK, "DA_MEM command ACK") #<-- 5A
+        self.send(NONE, 6) #<-- 015A00000001
+        ASSERT(self.send(NONE, 2) == ACK+ACK, "DA_MEM answer ACK+ACK") #<-- 5A5A
+        self.send(b'\x5B', 16) #<-- 00020000000200000000100000000000
+        ASSERT(self.send(NONE, 1) == NACK, "DA_MEM NACK") #<-- A5
+
 
     def da_write(self, block=4096):
-        ASSERT(self.send(DA_WRITE, 1) == ACK, "DA_WRITE ACK")
-        r = self.send(struct.pack(">BI", 0, block), 2) # Sequential Erase (0x1). (0x0) for Best-Effort Erase, packet_length
-        ASSERT(r == ACK + ACK, "DA_WRITE OK")
+        ASSERT(self.send(DA_WRITE, 1) == ACK, "DA_WRITE ACK") #--> D5 <-- 5A
+        # Sequential Erase (0x1). (0x0) for Best-Effort Erase, & Packet_length
+        ASSERT(self.send(struct.pack(">BI", 0, block), 2) == ACK + ACK, "DA_WRITE OK") #--> 0000001000 <-- 5A5A
 
     def da_write_data(self, data, block=4096):
-        w = 0
-        c = 0
+        crc = 0
         while data:
-            self.s.write(ACK)
+            w = self.crc_word( data[:block] )
+            self.s.write( ACK )
             self.s.write( data[:block] )
-            w = self.crc_word(data[:block])
-            r = self.send(struct.pack(">H", w), 1)
-            #print("crc", hex(w))
-            c += w
-            data = data[block:]     
-            PB_STEP()  
-        r = self.send(NONE, 3)  
-        r = self.send(struct.pack(">H", c & 0xFFFF), 1)   
-        #<-- 14175A  is error     
-
-    def printVersion(self):
-        self.send(DA_GET_PROJECT_ID_CMD, 1)
-        r = self.send(DA_GET_PROJECT_ID_CMD, 256)
-        r = r[:24].rstrip(b"\0") 
-        r = r.lstrip(b"\0")
-        print("Version", r[:24].rstrip(b"\0"))    
-
+            r = self.send( struct.pack(">H", w), 1 )
+            if r == CONF: # x69 'i'
+                crc += w
+                data = data[block:]     
+                PB_STEP()  
+            elif r == NACK: # need to wait for ack before sending next packet
+                start_time = time.time()
+                while True:
+                    if self.send(NONE, 1) == ACK:
+                        self.s.write(CONF)
+                        break
+                    ASSERT((time.time() - start_time) < 60, "write data timeout")
+            else:
+                ASSERT(False, "write data fail")
+        ack_count = 0
+        start_time = time.time()
+        while True:
+            if self.send(NONE, 1) == ACK:
+                ack_count += 1
+                if ack_count == 3:
+                    break
+            ASSERT((time.time() - start_time) < 10, "write data error")
+        self.send(struct.pack(">H", crc & 0xFFFF), 1)     
+ 
     def da_reset(self):
-        r = self.send(DA_CLEAR_POWERKEY_IN_META_MODE_CMD, 1) #<-- 5A
-        r = self.send(b'\xC9\x00', 1) #???<-- 5A
-        r = self.send(DA_ENABLE_WATCHDOG_CMD + b'\x01\x40\x00\x00\x00\x00', 1) #<-- 5A, RESET        
+        self.send(DA_CLEAR_POWERKEY, 1) #<-- 5A
+        self.send(b'\xC9\x00', 1) #<-- 5A
+        self.send(DA_ENABLE_WATCHDOG_CMD + b'\x01\x40\x00\x00\x00\x00', 1) #<-- 5A, RESET        
 
     def openApplication(self, fname, check=True):     
-        ASSERT( os.path.isfile(fname) == True, "No such APP file: " + fname ) 
+        ASSERT( os.path.isfile(fname) == True, "No such application file: " + fname ) 
         self.app_name = fname
         with open(fname,'rb') as f:
             app_data = f.read()
@@ -380,8 +378,6 @@ class MT6261:
                 ERROR("APP: FILE_INFO") 
         return app_data  
 
-    ### Ajay Bhargav
-    ###     https://github.com/ajaybhargav
     def da_changebaud(self, baud=460800):
         speed_table = {
             921600: UART_BAUD_921600,
@@ -402,7 +398,7 @@ class MT6261:
         ASSERT(self.send(ACK, 1) == ACK, "DA SPEED ACK fail")
         for i in range(256):
             loop_val = struct.pack(">B", i)
-            ASSERT(self.send(loop_val, 1) == loop_val, "DA SPEED Loop fail")
+            ASSERT(self.send(loop_val, 1) == loop_val, "DA SPEED loop fail")
 
     def uploadApplication(self, id, filename, check=False):  
         ASSERT( id in self.DEVICE, "Unknown module: {}".format(id) ) 
@@ -411,21 +407,47 @@ class MT6261:
         app_data = self.openApplication(filename, check)
         app_size = len(app_data)
         ASSERT( app_size <= app_max_size, "Application max size" ) 
-        print("Uploading application")  
+        PB_END()
+        print("Uploading Application")  
         PB_BEGIN()      
         self.da_mem(app_address, app_size) 
         self.da_write()
         self.da_write_data(app_data)
         PB_END()        
 
+    def formatFAT(self):         
+        self.send(DA_FORMAT_FAT + b'\x00\x01')  #--> B80001
+        r = self.send(NONE, 4)                  #<-- 00000000
+        ASSERT(r == b'\x00\x00\x00\x00', "Format FAT command failed")
+        r = self.send(NONE, 4)                  #<-- 00383000
+        fat_addr = struct.unpack(">I", r)[0]
+        r = self.send(NONE, 4)                  #<-- 0007D000
+        fat_len = struct.unpack(">I", r)[0]
+        self.send(NONE, 16)                     #<-- 00000000000000000000000000000000
+        ASSERT(self.send(NONE, 2) == ACK + ACK, "Format FAT ack failed")
+        print("Format Fat [0x%08x : 0x%08x]" % (fat_addr, fat_addr + fat_len - 1) )
+        PB_BEGIN()
+        start_time = time.time()
+        while (time.time() - start_time) < 20:
+            self.send(NONE, 4)
+            curr = self.send(NONE, 1)[0]
+            PB_STEP()
+            self.send(ACK)
+            if (curr == 100):
+                break
+        PB_END()
+
 ######################################################################
-def upload_app(module, file_name, com_port):  
+def upload_app(module, file_name, com_port, format=False, reset=False):  
     m = MT6261( Serial( com_port, 115200 ) )
     m.connect()  
     m.da_start()
     m.da_changebaud(460800)
     m.uploadApplication(module, file_name)
-    #m.da_reset() 
+    if format:
+        m.formatFAT()
+    if reset:
+        m.da_reset() 
     
     
 
