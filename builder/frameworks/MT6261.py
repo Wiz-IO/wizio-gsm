@@ -316,11 +316,13 @@ class MT6261:
         start_addr = address & 0x07FFFFFF
         end_addr = start_addr + size - 1
         r = self.send(DA_MEM + fota + struct.pack(">BIII", block_count, start_addr, end_addr, type), 1) #--> D3A501002C7000002D732F00007000
-        ASSERT(r == ACK, "DA_MEM command ACK") #<-- 5A
-        self.send(NONE, 6) #<-- 015A00000001
-        ASSERT(self.send(NONE, 2) == ACK+ACK, "DA_MEM answer ACK+ACK") #<-- 5A5A
+        ASSERT(r == ACK, "DA_MEM ACK") #<-- 5A
+        self.send(NONE, 2) #<-- 01 5A FileCount + ACK
+        cnt = struct.unpack(">I", self.send(NONE, 4))[0] # get Ack Count
+        for i in range( cnt + 1 ):
+            ASSERT(self.send(NONE, 1) == ACK, "DA_MEM COUNT ACK") #<-- 5A
         self.send(b'\x5B', 16) #<-- 00020000000200000000100000000000
-        ASSERT(self.send(NONE, 1) == NACK, "DA_MEM NACK") #<-- A5
+        ASSERT(self.send(NONE, 1) == NACK, "DA_MEM NACK") #--> 5B <-- A5
 
 
     def da_write(self, block=4096):
