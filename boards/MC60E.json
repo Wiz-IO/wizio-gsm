@@ -1,0 +1,27 @@
+{
+  "name": "Comet MC60E Demo board",
+  "url": "https://www.comet.bg/en/",
+  "build": {
+    "cortex"  : ["-march=armv5te", "-mfloat-abi=soft", "-mfpu=vfp", "-mthumb", "-mthumb-interwork"],
+    "core"    : "mc60e",
+    "variant" : "mc60e",
+    "f_cpu"   : "260000000L",
+    "mcu"     : "ARM, MT2502"
+  },
+  "debug": {
+    "tools": {
+      "uart": {
+        "onboard": true,
+        "extra_cmds": [],
+        "load_cmd": [],
+        "server": {}
+      }
+    }
+  },  
+  "frameworks": ["opencpu", "arduino"],
+  "vendor": "Quectel",
+  "upload": {
+        "maximum_ram_size": 102400,
+        "maximum_size": 286720
+  }
+}
