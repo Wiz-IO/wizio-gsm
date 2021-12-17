@@ -1,9 +1,7 @@
 # PlatformIO development platform for GSM modules
 
 ## Supported Platforms
-* Windows
-* Linux
-* Darwin
+* Windows, Linux, Darwin
 * etc ... GCC dependent 
 
 ## Supported Modules
