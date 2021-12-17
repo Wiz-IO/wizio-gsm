@@ -74,14 +74,9 @@ def dev_create_template(env):
 def dev_init(env):
     dev_set_compiler(env)
     SDK_DIR = join( env.framework_dir, env.platform, env.core )
-
-    linker = "c_m66.ld" 
-    if os.path.isfile( join(env.subst("$PROJECT_DIR"), "src", 'main.cpp')): linker = "cpp_m66.ld"
-    dev_set_linker(env, linker)
-
+    dev_set_linker(env, "c_m66.ld")
     dev_set_nano(env)
     dev_create_template(env)
-
     env.Append(
         ASFLAGS    = [],
         CPPDEFINES = [],
@@ -89,9 +84,8 @@ def dev_init(env):
             join('$PROJECT_DIR', 'config'),
             join(SDK_DIR, 'SDK', 'include'),
             join(SDK_DIR, 'SDK', 'ril', 'inc'),
-            join(SDK_DIR, 'SDK', 'hal'),
         ],
-        CCFLAGS    = [ ],
+        CCFLAGS    = [],
         CFLAGS     = [
             '-fno-builtin',
             '-fno-strict-aliasing',            
@@ -106,7 +100,6 @@ def dev_init(env):
         ],
         LIBPATH    = [ join(SDK_DIR, 'LIB') ], 
         LIBS       = [ 'm', 'c', 'gcc', '_app_start_{}'.format(env.core) ], 
-
         BUILDERS = dict(
             ElfToBin = Builder(
                 action = env.VerboseAction(' '.join([ '$OBJCOPY', '-O', 'binary', '$SOURCES', '$TARGET', ]), 'Building $TARGET'),
@@ -122,4 +115,3 @@ def dev_init(env):
 
     env.BuildSources( join('$BUILD_DIR', 'config'), join('$PROJECT_DIR', 'config') )
     env.BuildSources( join('$BUILD_DIR', 'ril'), join(SDK_DIR, 'SDK', 'ril', 'src') )
-    env.BuildSources( join('$BUILD_DIR', 'hal'), join(SDK_DIR, 'SDK', 'hal') )
