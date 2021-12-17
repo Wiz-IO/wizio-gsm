@@ -12,7 +12,7 @@
 
 ## Supported Boards
 * Comet M66 Demo Board
-* other boards - in progress...
+* Other boards - in progress...
 
 ![oled](https://raw.githubusercontent.com/Wiz-IO/LIB/master/images/comet-m66.jpg)
 
