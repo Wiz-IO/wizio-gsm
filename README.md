@@ -8,7 +8,7 @@
 * Quectel M66
 * * OpenCPU ( as is )
 * * Arduino ( C/C++ )
-* other modules - in progress... 
+* Other modules - in progress... 
 
 ## Supported Boards
 * Comet M66 Demo Board
