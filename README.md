@@ -23,9 +23,6 @@ _Note: be sure [**git**](https://git-scm.com/downloads) is installed_
 * INSTALL
 
 
-## Thanks to:
-* [Comet Electronics](https://www.comet.bg/en/)
-
 ***
 
 >If you want to help / support:   
